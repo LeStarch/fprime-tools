@@ -45,7 +45,7 @@ def run_impl(deployment: Path, path: Path, platform: str, verbose: bool):
     """Run implementation of files one time"""
     target = Target.get_target("impl", set())
     build = Build(target.build_type, deployment, verbose=verbose)
-    build.load(path, platform)
+    build.load(platform)
 
     hpp_files = glob.glob("{}/*.hpp".format(path), recursive=False)
     cpp_files = glob.glob("{}/*.cpp".format(path), recursive=False)
@@ -144,7 +144,7 @@ def add_unit_tests(deployment, comp_path, platform, verbose):
         test_path.mkdir(parents=True, exist_ok=True)
         target = Target.get_target("impl", {"ut"})
         build = Build(target.build_type, deployment, verbose=verbose)
-        build.load(comp_path, platform)
+        build.load(platform)
         print("Generating unit tests...")
         with suppress_stdout():
             build.execute(target, context=comp_path, make_args={})
