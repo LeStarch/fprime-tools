@@ -72,6 +72,12 @@ class EnumMismatchException(TypeException):
         )
 
 
+class MissingMemberException(TypeException):
+    """ Member was not defined on type """
+    def __init__(self, field):
+        super().__init__(f"Value does not define required field: {field}")
+
+
 class DeserializeException(TypeException):
     """Exception during deserialization"""
 
