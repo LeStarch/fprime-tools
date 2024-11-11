@@ -16,6 +16,37 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Union
 
 
+class EnvironmentVariableInterpolation(configparser.BasicInterpolation):
+    """ Interpolation for environment variables embedded in setting.ini
+
+    settings.ini will extrapolate $/${} as an environment variable. This will allow basic environment variable
+    replacement. It is illegal to supply an environment variable with a $ or %( as part of the value because that might
+    trigger unanticipated recursive parsing.
+
+    Note: environment variable substitution is only performed in the environment section and nowhere else.
+
+    Based off: https://stackoverflow.com/questions/26586801/configparser-and-string-interpolation-with-env-variable
+    """
+
+    def before_get(self, parser, section, option, value, defaults):
+        """ Pre-process sections to replace environment variables
+
+        Runs before the value is gotten to replace environment variables. It will use os.path.expandvars to do the
+        actual substitution on any value in the "environment" section. Other pre-processing is done first.
+
+        Args:
+            parser: unused
+            section: environment substitution will be done only when set to "environment"
+            option: unused
+            value: will be searched for and replace environment variables
+            defaults: unused
+        Returns:
+            the value post substitution
+        """
+        value = super().before_get(parser, section, option, value, defaults)
+        return os.path.expandvars(value) if section == "environment" else value
+
+
 class SettingType(Enum):
     """Designates the type of the setting"""
 
@@ -171,7 +202,7 @@ class IniSettings:
         # Setup a config parser, or none if the settings file does not exist
         confparse = None
         if settings_file.exists():
-            confparse = configparser.ConfigParser()
+            confparse = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation)
             confparse.read(settings_file)
         else:
             print(f"[WARNING] {settings_file} does not exist", file=sys.stderr)
@@ -235,7 +266,7 @@ class IniSettings:
         :param env_file: load environment from this file
         :return: environment dictionary
         """
-        parser = configparser.ConfigParser()
+        parser = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation)
         parser.optionxform = str
         parser.read(env_file)
         env_dict = {}
