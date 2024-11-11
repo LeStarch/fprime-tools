@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict, List, Union
 
 
 class EnvironmentVariableInterpolation(configparser.BasicInterpolation):
-    """ Interpolation for environment variables embedded in setting.ini
+    """Interpolation for environment variables embedded in setting.ini
 
     settings.ini will extrapolate $/${} as an environment variable. This will allow basic environment variable
     replacement. It is illegal to supply an environment variable with a $ or %( as part of the value because that might
@@ -29,7 +29,7 @@ class EnvironmentVariableInterpolation(configparser.BasicInterpolation):
     """
 
     def before_get(self, parser, section, option, value, defaults):
-        """ Pre-process sections to replace environment variables
+        """Pre-process sections to replace environment variables
 
         Runs before the value is gotten to replace environment variables. It will use os.path.expandvars to do the
         actual substitution on any value in the "environment" section. Other pre-processing is done first.
@@ -202,7 +202,9 @@ class IniSettings:
         # Setup a config parser, or none if the settings file does not exist
         confparse = None
         if settings_file.exists():
-            confparse = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation())
+            confparse = configparser.ConfigParser(
+                interpolation=EnvironmentVariableInterpolation()
+            )
             confparse.read(settings_file)
         else:
             print(f"[WARNING] {settings_file} does not exist", file=sys.stderr)
@@ -266,7 +268,9 @@ class IniSettings:
         :param env_file: load environment from this file
         :return: environment dictionary
         """
-        parser = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation())
+        parser = configparser.ConfigParser(
+            interpolation=EnvironmentVariableInterpolation()
+        )
         parser.optionxform = str
         parser.read(env_file)
         env_dict = {}

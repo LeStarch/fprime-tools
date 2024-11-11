@@ -136,10 +136,7 @@ def test_settings():
                 "install_destination": full_path("settings-data/build-artifacts"),
                 "library_locations": [],
                 "environment_file": full_path("settings-data/settings-environment.ini"),
-                "environment": {
-                    "MY_VARIABLE": "my value",
-                    "MY_VARIABLE_2": "abc:123"
-                },
+                "environment": {"MY_VARIABLE": "my value", "MY_VARIABLE_2": "abc:123"},
                 "component_cookiecutter": "default",
                 "deployment_cookiecutter": "default",
                 "project_root": full_path(".."),
