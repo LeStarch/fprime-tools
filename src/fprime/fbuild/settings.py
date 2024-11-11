@@ -202,7 +202,7 @@ class IniSettings:
         # Setup a config parser, or none if the settings file does not exist
         confparse = None
         if settings_file.exists():
-            confparse = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation)
+            confparse = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation())
             confparse.read(settings_file)
         else:
             print(f"[WARNING] {settings_file} does not exist", file=sys.stderr)
@@ -266,7 +266,7 @@ class IniSettings:
         :param env_file: load environment from this file
         :return: environment dictionary
         """
-        parser = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation)
+        parser = configparser.ConfigParser(interpolation=EnvironmentVariableInterpolation())
         parser.optionxform = str
         parser.read(env_file)
         env_dict = {}
