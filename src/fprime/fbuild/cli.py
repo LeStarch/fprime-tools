@@ -57,11 +57,11 @@ def run_fbuild_cli(
         toolchain = build.find_toolchain()
         print(f"[INFO] Generating build directory at: {build.build_dir}")
         print(f"[INFO] Using toolchain file {toolchain} for platform {parsed.platform}")
-        if parsed.ut and not parsed.disable_sanitizers:
+        if parsed.disable_sanitizers:
             # The following options are defined in F' to have CMake enable the sanitizers
-            cmake_args["ENABLE_SANITIZER_LEAK"] = "ON"
-            cmake_args["ENABLE_SANITIZER_ADDRESS"] = "ON"
-            cmake_args["ENABLE_SANITIZER_UNDEFINED_BEHAVIOR"] = "ON"
+            cmake_args["ENABLE_SANITIZER_LEAK"] = "OFF"
+            cmake_args["ENABLE_SANITIZER_ADDRESS"] = "OFF"
+            cmake_args["ENABLE_SANITIZER_UNDEFINED_BEHAVIOR"] = "OFF"
         if toolchain is not None:
             cmake_args["CMAKE_TOOLCHAIN_FILE"] = toolchain
         if parsed.ninja:
