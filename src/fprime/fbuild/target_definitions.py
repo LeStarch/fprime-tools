@@ -6,7 +6,7 @@ as such, each target need only be instantiated but need not be assigned to anyth
 """
 
 from .gcovr import GcovrTarget
-from .target import BuildSystemTarget, TargetScope
+from .target import BuildSystemTarget, DesignatedBuildSystemTarget, TargetScope
 from .types import BuildType
 
 #### "build" targets for components, deployments, unittests for both normal and testing builds ####
@@ -27,9 +27,26 @@ BuildSystemTarget(
 BuildSystemTarget(
     "all",
     mnemonic="build",
-    desc="Build components, ports, UTs, and deployments for unittest build",
+    desc="Build all components, ports, UTs, and deployments for unittest build",
     scope=TargetScope.GLOBAL,
     flags={"all", "ut"},
+    build_type=BuildType.BUILD_TESTING,
+)
+
+DesignatedBuildSystemTarget(
+    "target",
+    mnemonic="build",
+    desc="Build a specific CMake target by name",
+    scope=TargetScope.GLOBAL,
+    flags={"target"},
+)
+
+DesignatedBuildSystemTarget(
+    "target",
+    mnemonic="build",
+    desc="Build a specific CMake target by name using the UT build",
+    scope=TargetScope.GLOBAL,
+    flags={"ut", "target"},
     build_type=BuildType.BUILD_TESTING,
 )
 

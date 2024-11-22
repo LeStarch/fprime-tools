@@ -9,6 +9,7 @@ contain build system targets (e.g. CMake target invokers), and miscellaneous tar
 import functools
 import itertools
 from abc import ABC, abstractmethod
+from argparse import Action
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
@@ -339,6 +340,43 @@ class BuildSystemTarget(Target):
             str(builder.build_dir), context
         )
         return self.build_target in build_target_names
+
+
+class DesignateTargetAction(Action):
+    """This class, when used as the action will set the target of all DesignatedBuildSystemTarget
+
+    argparse.Action actions can be used to handle custom behavior when parsing commands. This class will use the
+    --target flag to specify the build target on all known DesignatedBuildSystemTarget that have registered with this
+    class.
+    """
+
+    _DESIGNEES = []
+
+    @classmethod
+    def register_designee(cls, designee):
+        """Register designee to this action"""
+        cls._DESIGNEES.append(designee)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        """Required __call__ function triggered by the parse"""
+        assert len(values) == 1, "Values object should contain 1 value"
+        for designee in self._DESIGNEES:
+            designee.set_target(values[0])
+        # The build target detection looks for true/false flags to be set. Mimic this by setting 'target' to True
+        setattr(namespace, "target", True)
+
+
+class DesignatedBuildSystemTarget(BuildSystemTarget):
+    """Invokes a designated target using the --target flag"""
+
+    def __init__(self, _, *args, **kwargs):
+        """Constructor setting child targets"""
+        super().__init__(None, *args, **kwargs)
+        DesignateTargetAction.register_designee(self)
+
+    def set_target(self, target):
+        """Set the target to build"""
+        self.build_target = target
 
 
 class DelegatorTarget(Target):

@@ -12,7 +12,7 @@ from typing import Callable, Dict, List, Tuple
 
 from fprime.common.utils import confirm
 from fprime.fbuild.builder import Build
-from fprime.fbuild.target import Target
+from fprime.fbuild.target import Target, DesignateTargetAction
 from fprime.fbuild.types import BuildType
 
 
@@ -180,12 +180,23 @@ def add_target_parser(
             if target.allows_pass_args()
             else ""
         )
-        parser.add_argument(
-            f"--{flag}",
-            action="store_true",
-            default=False,
-            help=f"{target.desc}{extra_help}",
-        )
+        # Target flag special handling
+        if flag == "target":
+            parser.add_argument(
+                f"--target",
+                type=str,
+                action=DesignateTargetAction,
+                default=None,
+                nargs=1,
+                help=f"{target.desc}",
+            )
+        else:
+            parser.add_argument(
+                f"--{flag}",
+                action="store_true",
+                default=False,
+                help=f"{target.desc}{extra_help}",
+            )
     for flag, description in filter(
         lambda flag_desc: flag_desc[0] not in flags, target.option_args()
     ):
