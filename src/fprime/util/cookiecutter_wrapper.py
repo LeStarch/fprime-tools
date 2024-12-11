@@ -3,7 +3,6 @@
 
 import glob
 import os
-import shutil
 import sys
 
 from typing import TYPE_CHECKING
@@ -13,7 +12,7 @@ from pathlib import Path
 from cookiecutter.exceptions import OutputDirExistsException
 from cookiecutter.main import cookiecutter
 
-from fprime.common.utils import confirm
+from fprime.common.utils import confirm, check_path_is_within_fprime_module
 from fprime.fbuild.builder import Build
 from fprime.fbuild.cmake import CMakeExecutionException
 from fprime.fpp.impl import fpp_generate_implementation
@@ -88,6 +87,14 @@ def find_nearest_cmake_file(component_dir: Path, cmake_root: Path, proj_root: Pa
 
 def new_component(build: Build, parsed_args: "argparse.Namespace"):
     """Uses cookiecutter for making new components"""
+
+    if check_path_is_within_fprime_module(Path.cwd()) and not parsed_args.force:
+        print(
+            "[ERROR] Wrong location. Cannot create component within an existing component or deployment."
+            " Use --force to override."
+        )
+        return 1
+
     try:
         proj_root = build.get_settings("project_root", None)
 
@@ -149,6 +156,13 @@ def new_component(build: Build, parsed_args: "argparse.Namespace"):
 
 def new_deployment(build: Build, parsed_args: "argparse.Namespace"):
     """Creates a new deployment using cookiecutter"""
+
+    if check_path_is_within_fprime_module(Path.cwd()) and not parsed_args.force:
+        print(
+            "[ERROR] Wrong location. Cannot create deployment within an existing component or deployment"
+        )
+        return 1
+
     # Checks if deployment_cookiecutter is set in settings.ini file, else uses local install template as default
     if (
         build.get_settings("deployment_cookiecutter", None) is not None

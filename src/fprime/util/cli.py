@@ -148,6 +148,12 @@ def add_special_parsers(
         action="store_true",
         help="Prevent updating the virtual environment during project creation",
     )
+    new_parser.add_argument(
+        "--force",
+        default=False,
+        action="store_true",
+        help="Override warning about creating new deployment or component within a deployment or component",
+    )
     new_exclusive = new_parser.add_argument_group(
         "'new' targets"
     ).add_mutually_exclusive_group()
