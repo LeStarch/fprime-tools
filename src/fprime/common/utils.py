@@ -26,3 +26,29 @@ def replace_contents(filename, what, replacement, count=1):
         new_file = changelog.replace(what, replacement, count)
         fh.write(new_file)
         return new_file != changelog
+
+
+def check_path_is_within_fprime_module(path: Path):
+    """Check if the current working directory is within an F prime module
+
+    This is done by checking if any line in the path/CMakeLists.txt file starts
+    with register_fprime_*
+
+    This is useful to prevent users from running commands in the wrong location.
+
+    Returns:
+        bool: True if the path is within an F prime module, False otherwise
+    """
+
+    if not Path(path / "CMakeLists.txt").exists():
+        return False
+
+    with open(path / "CMakeLists.txt") as cmake_file:
+        lines = cmake_file.readlines()
+
+    # Looks for line "register_fprime_*" in CMakeLists.txt
+    statement = "register_fprime_"
+    for line in lines:
+        if line.startswith(statement):
+            return True
+    return False
