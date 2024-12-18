@@ -440,6 +440,18 @@ class Build:
         path = Path(self.settings["install_destination"])
         return path if path.exists() else None
 
+    def refresh(self):
+        """ Refresh this build (i.e. the cmake build cache)
+
+        Some build systems (e.g. CMake) require the build to be refreshed (i.e. refresh the build cache). When this
+        happens it is imperative that the appropriate environment is set. For this reason, refresh is exposed as a
+        helper in this layer rather than the previous pattern of calling builder.cmake.cmake_refresh_cache directly.
+        """
+        self.cmake.cmake_refresh_cache(
+            self.build_dir,
+            environment=self.settings.get("environment", None)
+        )
+
     @staticmethod
     def find_nearest_parent_project(path: Path) -> Path:
         """Recurse up the directory stack looking for a valid CMake project.

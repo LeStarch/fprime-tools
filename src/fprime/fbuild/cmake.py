@@ -86,6 +86,7 @@ class CMakeHandler:
         :param target: target to execute at the path, using above build_dir
         :param path: path to run target against. (default) current working directory
         :param cmake_args: cmake args input
+        :param make_args: arguments to pass to make
         :param top_target: top-level target. Do not append path name
         :param environment: environment to setup when executing CMake
         :param full_cache_rebuild: rebuild the cache fully. Default: False, use the short version
@@ -151,7 +152,7 @@ class CMakeHandler:
             print(
                 "[CMAKE] CMake failed to detect target, attempting CMake cache refresh and retry"
             )
-            self.cmake_refresh_cache(build_dir, full=full_cache_rebuild)
+            self.cmake_refresh_cache(build_dir, environment, full=full_cache_rebuild)
             return self._run_cmake(
                 run_args + fleshed_args,
                 write_override=True,
@@ -477,16 +478,18 @@ class CMakeHandler:
         if not os.path.isfile(cache_file):
             raise CMakeInvalidBuildException(build_dir)
 
-    def cmake_refresh_cache(self, build_dir, full=False):
-        """
+    def cmake_refresh_cache(self, build_dir, environment=None, full=False):
+        """ Refresh the CMake cache by calling a known cache-refresh target
+
         Runs the cmake  target required to refresh the cmake cache. This will allow for unknown targets to be searched
         for before the utility gives up and produces.
 
-        :param build_dir: directory to build in
-        :param full: full re-generate of the cache. Default: false, attempt to build 'refresh_cache' target instead
+        :param build_dir: cache directory to run in
+        :param environment: environment to pass in when refreshing
+        :param full: perform a full rebuild
         """
+        environment = {} if environment is None else environment
         if full:
-            environment = {}
             run_args = ["--build", str(build_dir)]
             if self.verbose:
                 print("[CMAKE] Refreshing CMake build cache")
@@ -503,24 +506,16 @@ class CMakeHandler:
             if self.verbose:
                 print("[CMAKE] Checking CMake cache for rebuild")
             # Backwards compatibility: refresh_cache was named noop until v3.3.x
-            if self._is_noop_supported(str(build_dir)):
-                self.execute_known_target(
-                    "noop",
-                    build_dir,
-                    None,
-                    top_target=True,
-                    full_cache_rebuild=True,
-                    print_output=True,
-                )
-            else:
-                self.execute_known_target(
-                    "refresh_cache",
-                    build_dir,
-                    None,
-                    top_target=True,
-                    full_cache_rebuild=True,
-                    print_output=True,
-                )
+            refresh_target = "noop" if self._is_noop_supported(str(build_dir)) else "refresh_cache"
+            self.execute_known_target(
+                refresh_target,
+                build_dir,
+                None,
+                top_target=True,
+                full_cache_rebuild=True,
+                print_output=True,
+                environment=environment
+            )
 
     def _run_cmake(
         self,

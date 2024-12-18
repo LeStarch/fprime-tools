@@ -126,7 +126,7 @@ class FppUtility(ExecutableAction):
             )
             return 1
 
-        builder.cmake.cmake_refresh_cache(builder.build_dir, False)
+        builder.refresh()
 
         # Read files and arguments
         locations = self.get_locations_file(builder)
