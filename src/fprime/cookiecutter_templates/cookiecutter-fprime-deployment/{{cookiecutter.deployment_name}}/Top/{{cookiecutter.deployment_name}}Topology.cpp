@@ -80,7 +80,7 @@ Svc::Health::PingEntry pingEntries[] = {
  * allocating resources, passing-in arguments, etc. This function may be inlined into the topology setup function if
  * desired, but is extracted here for clarity.
  */
-void configureTopology() {
+void configureTopology(const TopologyState& state) {
     // Buffer managers need a configured set of buckets and an allocator used to allocate memory for those buckets.
     Svc::BufferManager::BufferBins upBuffMgrBins;
     memset(&upBuffMgrBins, 0, sizeof(upBuffMgrBins));
@@ -129,6 +129,11 @@ void configureTopology() {
     configurationTable.entries[2] = {.depth = 100, .priority = 1};
     // Allocation identifier is 0 as the MallocAllocator discards it
     comQueue.configure(configurationTable, 0, mallocator);
+{%- if (cookiecutter.com_driver_type in ["TcpServer", "TcpClient"]) %}
+    if (state.hostname != nullptr && state.port != 0) {
+        comDriver.configure(state.hostname, state.port);
+    }
+{%- endif %}
 }
 
 // Public functions for use in main program are namespaced with deployment name {{cookiecutter.deployment_name}}
@@ -143,7 +148,7 @@ void setupTopology(const TopologyState& state) {
     // Autocoded configuration. Function provided by autocoder.
     configComponents(state);
     // Deployment-specific component configuration. Function provided above. May be inlined, if desired.
-    configureTopology();
+    configureTopology(state);
     // Autocoded command registration. Function provided by autocoder.
     regCommands();
     // Autocoded parameter loading. Function provided by autocoder.
@@ -155,8 +160,7 @@ void setupTopology(const TopologyState& state) {
     if (state.hostname != nullptr && state.port != 0) {
         Os::TaskString name("ReceiveTask");
         // Uplink is configured for receive so a socket task is started
-        comDriver.configure(state.hostname, state.port);
-        comDriver.start(name, true, COMM_PRIORITY, Default::STACK_SIZE);
+        comDriver.start(name, COMM_PRIORITY, Default::STACK_SIZE);
     }
 {%- elif cookiecutter.com_driver_type == "UART" %}
     if (state.uartDevice != nullptr) {
