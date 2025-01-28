@@ -14,6 +14,7 @@ from .type_exceptions import (
     MissingMemberException,
     NotInitializedException,
     TypeMismatchException,
+    DeserializeException,
 )
 
 
@@ -139,10 +140,16 @@ class SerializableType(DictionaryType):
         """Deserialize the values of each of the members"""
         new_value = {}
         for member_name, member_type, _, _ in self.MEMBER_LIST:
-            new_member = member_type()
-            new_member.deserialize(data, offset)
-            new_value[member_name] = new_member
-            offset += new_member.getSize()
+            try:
+                new_member = member_type()
+                new_member.deserialize(data, offset)
+                new_value[member_name] = new_member
+                offset += new_member.getSize()
+            except Exception as exc:
+                raise DeserializeException(
+                    f"'{member_name}' [{member_name.__name__}] failed to deserialize: {exc}",
+                    exc,
+                )
         self._val = new_value
 
     def getSize(self):

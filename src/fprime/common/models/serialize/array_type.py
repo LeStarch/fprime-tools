@@ -12,6 +12,7 @@ from .type_exceptions import (
     ArrayLengthException,
     NotInitializedException,
     TypeMismatchException,
+    DeserializeException,
 )
 
 
@@ -112,11 +113,16 @@ class ArrayType(DictionaryType):
     def deserialize(self, data, offset):
         """Deserialize the members of the array"""
         values = []
-        for _ in range(self.LENGTH):
-            item = self.MEMBER_TYPE()
-            item.deserialize(data, offset)
-            offset += item.getSize()
-            values.append(item)
+        for field_index in range(self.LENGTH):
+            try:
+                item = self.MEMBER_TYPE()
+                item.deserialize(data, offset)
+                offset += item.getSize()
+                values.append(item)
+            except Exception as exc:
+                raise DeserializeException(
+                    f"Array index {field_index} failed to deserialize: {exc}", exc
+                )
         self._val = values
 
     def getSize(self):
