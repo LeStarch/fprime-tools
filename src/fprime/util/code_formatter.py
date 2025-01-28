@@ -21,11 +21,11 @@ MARKER = "// WARNING: fprime-util format mishap"
 
 # POST pattern is different because the formatting will likely introduce whitespaces
 PRIVATE_PRE_PATTERN = f"private:{MARKER}"
-PRIVATE_POST_PATTERN = f"private:[\s]*{MARKER}"
+PRIVATE_POST_PATTERN = rf"private:[\s]*{MARKER}"
 PROTECTED_PRE_PATTERN = f"protected:{MARKER}"
-PROTECTED_POST_PATTERN = f"protected:[\s]*{MARKER}"
+PROTECTED_POST_PATTERN = rf"protected:[\s]*{MARKER}"
 STATIC_PRE_PATTERN = f"static:{MARKER}"
-STATIC_POST_PATTERN = f"static:[\s]*{MARKER}"
+STATIC_POST_PATTERN = rf"static:[\s]*{MARKER}"
 
 # clang-format will try to format everything it is given - restrict for the time being
 ALLOWED_EXTENSIONS = [
@@ -96,9 +96,9 @@ class ClangFormatter(ExecutableAction):
             with open(filepath, "r") as file:
                 content = file.read()
             # Replace the strings in the file content
-            content = re.sub("PROTECTED[\s]*:", PROTECTED_PRE_PATTERN, content)
-            content = re.sub("PRIVATE[\s]*:", PRIVATE_PRE_PATTERN, content)
-            content = re.sub("STATIC[\s]*:", STATIC_PRE_PATTERN, content)
+            content = re.sub(r"PROTECTED[\s]*:", PROTECTED_PRE_PATTERN, content)
+            content = re.sub(r"PRIVATE[\s]*:", PRIVATE_PRE_PATTERN, content)
+            content = re.sub(r"STATIC[\s]*:", STATIC_PRE_PATTERN, content)
             # Write the file out to the same location, seemingly in-place
             with open(filepath, "w") as file:
                 file.write(content)
