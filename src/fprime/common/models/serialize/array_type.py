@@ -121,7 +121,7 @@ class ArrayType(DictionaryType):
                 values.append(item)
             except Exception as exc:
                 raise DeserializeException(
-                    f"Array index {field_index} failed to deserialize: {exc}", exc
+                    f"Array index {field_index} failed to deserialize: {exc}"
                 )
         self._val = values
 

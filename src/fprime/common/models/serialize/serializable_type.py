@@ -147,8 +147,7 @@ class SerializableType(DictionaryType):
                 offset += new_member.getSize()
             except Exception as exc:
                 raise DeserializeException(
-                    f"'{member_name}' [{member_name.__name__}] failed to deserialize: {exc}",
-                    exc,
+                    f"Field '{member_name}' [{member_type.__name__}] failed to deserialize: {exc}"
                 )
         self._val = new_value
 
